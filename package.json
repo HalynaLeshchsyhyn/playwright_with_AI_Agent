@@ -1,0 +1,19 @@
+{
+  "name": "project-using-skills-ai-agent",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report",
+    "monocart:report": "open test-results/monocart/index.html",
+    "mcp": "playwright-mcp"
+  },
+  "devDependencies": {
+    "@playwright/mcp": "latest",
+    "@playwright/test": "^1.44.0",
+    "monocart-reporter": "^2.11.2",
+    "typescript": "^5.4.0"
+  }
+}
