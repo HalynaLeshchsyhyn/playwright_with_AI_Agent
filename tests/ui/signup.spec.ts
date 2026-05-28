@@ -1,7 +1,3 @@
-<<<<<<<< HEAD:tests/signup.spec.ts
-// Moved to tests/ui/signup.spec.ts
-export {};
-========
 import { Locator } from '@playwright/test';
 import { test, expect } from '../fixtures/ecom.fixture';
 import { randomUser, randomAddress } from '../../helpers/testData';
@@ -23,7 +19,7 @@ test.describe('TC-REG — New User Signup!', () => {
     await page.goto('/login');
   });
 
-  // ── 1. Happy Path ──────────────────────────────────────────────────────────
+  // ── 1. Happy Path ─────────────────────────────────────────────────────────────
 
   test('TC-REG-001 — new user completes full registration and is logged in', async ({
     loginPage, signupPage, accountCreatedPage, navBar,
@@ -74,7 +70,6 @@ test.describe('TC-REG — New User Signup!', () => {
     await loginPage.fillSignup(user.name, user.email);
     await expect(signupPage.getEnterAccountInfoHeading()).toBeVisible();
 
-    // Company and address2 are intentionally not passed — optional fields
     await signupPage.fillRegistrationForm({
       password:     user.password,
       firstName:    address.firstName,
@@ -88,12 +83,11 @@ test.describe('TC-REG — New User Signup!', () => {
     await signupPage.clickCreateAccount();
 
     await expect(accountCreatedPage.getHeading()).toBeVisible();
-
     await accountCreatedPage.clickContinue();
     await navBar.clickDeleteAccount();
   });
 
-  // ── 2. Negative — Step 1 (Signup form on /login) ──────────────────────────
+  // ── 2. Negative — Step 1 (Signup form on /login) ───────────────────────────────
 
   test('TC-REG-003 — signup with empty Name shows browser validation', async ({
     page, loginPage,
@@ -144,11 +138,10 @@ test.describe('TC-REG — New User Signup!', () => {
     await expect(signupPage.getDuplicateEmailError()).toHaveText('Email Address already exist!');
   });
 
-  // ── 3. Negative — Step 2 (Registration form on /signup) ───────────────────
+  // ── 3. Negative — Step 2 (Registration form on /signup) ───────────────────────
 
   test.describe('Registration form — required field validation', () => {
 
-    // Navigate to /signup before each test in this group
     test.beforeEach(async ({ loginPage, page }) => {
       const { name, email } = randomUser();
       Logger.debug(`Navigating to /signup with temp user: ${email}`);
@@ -278,7 +271,7 @@ test.describe('TC-REG — New User Signup!', () => {
 
   });
 
-  // ── 4. Boundary Conditions ─────────────────────────────────────────────────
+  // ── 4. Boundary Conditions ─────────────────────────────────────────────────────────
 
   test('TC-REG-015 — 1-character password is accepted (no minimum length enforced)', async ({
     loginPage, signupPage, accountCreatedPage, navBar,
@@ -303,7 +296,6 @@ test.describe('TC-REG — New User Signup!', () => {
     await signupPage.clickCreateAccount();
 
     await expect(accountCreatedPage.getHeading()).toBeVisible();
-
     await accountCreatedPage.clickContinue();
     await navBar.clickDeleteAccount();
   });
@@ -322,7 +314,7 @@ test.describe('TC-REG — New User Signup!', () => {
     await expect(signupPage.getEnterAccountInfoHeading()).toBeVisible();
   });
 
-  // ── 5. Edge Cases ──────────────────────────────────────────────────────────
+  // ── 5. Edge Cases ─────────────────────────────────────────────────────────────────
 
   test('TC-REG-017 — Email field on /signup is disabled and pre-filled from Step 1', async ({
     loginPage, signupPage,
@@ -333,7 +325,6 @@ test.describe('TC-REG — New User Signup!', () => {
     await loginPage.fillSignup(name, email);
     await expect(signupPage.getEnterAccountInfoHeading()).toBeVisible();
 
-    // Field must be disabled — user cannot change their email after Step 1
     await expect(signupPage.getEmailField()).toBeDisabled();
     await expect(signupPage.getEmailField()).toHaveValue(email);
   });
@@ -341,7 +332,7 @@ test.describe('TC-REG — New User Signup!', () => {
   test('TC-REG-018 — Name with special characters is accepted', async ({
     page, loginPage, signupPage,
   }) => {
-    const specialName = "O'Brien-Müller";
+    const specialName = "O'Brien-M\u00fcller";
     const { email }   = randomUser();
     Logger.info(`TC-REG-018: Enter Name with special chars: ${specialName}`);
 
@@ -359,7 +350,6 @@ test.describe('TC-REG — New User Signup!', () => {
     Logger.info('TC-REG-019: Navigate directly to /signup, bypassing Step 1');
     await page.goto('/signup');
 
-    // Either redirected away, or email field is empty/absent — form cannot be used
     const isOnSignup = page.url().includes('/signup');
     if (isOnSignup) {
       Logger.warn('TC-REG-019: /signup loaded directly — verifying email field is empty');
@@ -372,4 +362,3 @@ test.describe('TC-REG — New User Signup!', () => {
   });
 
 });
->>>>>>>> 749ae4e (Reorganize project structure: move pages, add API tests and skills):tests/ui/signup.spec.ts

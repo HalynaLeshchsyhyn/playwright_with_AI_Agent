@@ -209,12 +209,6 @@ mcp_github_search_pull_requests(
 )
 ```
 
-Common query patterns:
-- `is:open` / `is:closed` / `is:merged`
-- `base:main` — PRs targeting `main`
-- `head:<branch>` — PRs from a specific branch
-- `author:<username>` — PRs by a specific author
-
 ---
 
 ### Workflow D — Merge a Pull Request
@@ -225,7 +219,7 @@ mcp_github_merge_pull_request(
   owner:        "<owner>",
   repo:         "<repo>",
   pullNumber:   <PR number>,
-  merge_method: "squash"   // "merge" | "squash" | "rebase"
+  merge_method: "squash"
 )
 ```
 
@@ -254,15 +248,13 @@ mcp_github_get_file_contents(
   owner: "<owner>",
   repo:  "<repo>",
   path:  "path/to/file.ts",
-  ref:   "main"              // branch, tag, or commit SHA (optional)
+  ref:   "main"
 )
 ```
 
 ---
 
 ## Commit Message Conventions
-
-Use this format for commit messages when pushing files:
 
 ```
 <type>: <short summary>
@@ -271,22 +263,6 @@ Use this format for commit messages when pushing files:
 ```
 
 Types: `feat`, `fix`, `refactor`, `test`, `chore`, `docs`
-
-Examples:
-```
-feat: add API test suite for user endpoints
-
-- Add tests/api/user.api.spec.ts (TC-API-007 to TC-API-014)
-- Add tests/api/support/UserApiClient.ts
-- Add tests/fixtures/api.fixture.ts
-```
-
-```
-refactor: move pages/ to project root
-
-- Move tests/pages/ → pages/
-- Update tests/fixtures/ecom.fixture.ts import paths
-```
 
 ---
 
