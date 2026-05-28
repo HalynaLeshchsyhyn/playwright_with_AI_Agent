@@ -1,16 +1,16 @@
 import { test as base } from '@playwright/test';
-import { HomePage } from '../pages/HomePage';
-import { NavBar } from '../pages/components/NavBar';
-import { LoginPage } from '../pages/LoginPage';
-import { SignupPage } from '../pages/SignupPage';
-import { AccountCreatedPage } from '../pages/AccountCreatedPage';
-import { ProductsPage } from '../pages/ProductsPage';
-import { ProductDetailsPage } from '../pages/ProductDetailsPage';
-import { CartPage } from '../pages/CartPage';
-import { CheckoutPage } from '../pages/CheckoutPage';
-import { PaymentPage } from '../pages/PaymentPage';
-import { OrderConfirmedPage } from '../pages/OrderConfirmedPage';
-import { DeleteAccountPage } from '../pages/DeleteAccountPage';
+import { HomePage } from '../../pages/HomePage';
+import { NavBar } from '../../pages/components/NavBar';
+import { LoginPage } from '../../pages/LoginPage';
+import { SignupPage } from '../../pages/SignupPage';
+import { AccountCreatedPage } from '../../pages/AccountCreatedPage';
+import { ProductsPage } from '../../pages/ProductsPage';
+import { ProductDetailsPage } from '../../pages/ProductDetailsPage';
+import { CartPage } from '../../pages/CartPage';
+import { CheckoutPage } from '../../pages/CheckoutPage';
+import { PaymentPage } from '../../pages/PaymentPage';
+import { OrderConfirmedPage } from '../../pages/OrderConfirmedPage';
+import { DeleteAccountPage } from '../../pages/DeleteAccountPage';
 
 type EcomFixtures = {
   homePage: HomePage;
