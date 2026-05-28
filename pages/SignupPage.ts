@@ -42,6 +42,8 @@ export class SignupPage {
     this.duplicateEmailError    = page.locator('p[style*="color: red"]');
   }
 
+  // All params are optional so negative tests can omit the field under test.
+  // Existing callers that pass all params are unaffected.
   async fillRegistrationForm(params: {
     password?: string;
     firstName?: string;

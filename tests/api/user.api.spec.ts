@@ -89,7 +89,10 @@ test.describe('User Account API — lifecycle', () => {
     Logger.debug(`Cleanup delete response: ${body.responseCode} — ${body.message}`);
   });
 
+  // ── TC-API-011: Create account ────────────────────────────────────────────
+
   test('TC-API-011 — POST /api/createAccount creates a new user and returns responseCode 201', async ({ userApi }) => {
+    // Account is created in beforeAll — create a second one here to keep the test atomic
     const user = randomUser();
     const address = randomAddress();
     const form = buildAccountForm(user, address);
@@ -106,9 +109,12 @@ test.describe('User Account API — lifecycle', () => {
     expect(body.responseCode).toBe(201);
     expect(body.message).toBe(ApiMessages.USER_CREATED);
 
+    // Cleanup the extra account
     Logger.debug(`Deleting extra account: ${user.email}`);
     await userApi.deleteAccount(user.email, user.password);
   });
+
+  // ── TC-API-007: Verify login ──────────────────────────────────────────────
 
   test('TC-API-007 — POST /api/verifyLogin with valid credentials returns responseCode 200', async ({ userApi }) => {
     Logger.info(`Sending POST /api/verifyLogin for ${accountEmail}`);
@@ -124,6 +130,8 @@ test.describe('User Account API — lifecycle', () => {
     expect(body.responseCode).toBe(200);
     expect(body.message).toBe(ApiMessages.USER_EXISTS);
   });
+
+  // ── TC-API-013: Update account ────────────────────────────────────────────
 
   test('TC-API-013 — PUT /api/updateAccount updates user data and returns responseCode 200', async ({ userApi }) => {
     const newAddress = randomAddress();
@@ -153,6 +161,8 @@ test.describe('User Account API — lifecycle', () => {
     expect(body.message).toBe(ApiMessages.USER_UPDATED);
   });
 
+  // ── TC-API-014: Get user by email ─────────────────────────────────────────
+
   test('TC-API-014 — GET /api/getUserDetailByEmail returns user data for a valid email', async ({ userApi }) => {
     Logger.info(`Sending GET /api/getUserDetailByEmail?email=${accountEmail}`);
 
@@ -172,13 +182,17 @@ test.describe('User Account API — lifecycle', () => {
     expect(body.user).toHaveProperty('first_name');
     expect(body.user).toHaveProperty('last_name');
 
+    // Verify the updated first_name from TC-API-013 is reflected
     if (updatedFirstName) {
       Logger.debug(`Verifying updated first_name: ${updatedFirstName}`);
       expect(body.user.first_name).toBe(updatedFirstName);
     }
   });
 
+  // ── TC-API-012: Delete account ────────────────────────────────────────────
+
   test('TC-API-012 — DELETE /api/deleteAccount removes the user and returns responseCode 200', async ({ userApi }) => {
+    // Create a separate user for this test to keep it independent from afterAll cleanup
     const user = randomUser();
     const address = randomAddress();
     const form = buildAccountForm(user, address);
@@ -200,6 +214,7 @@ test.describe('User Account API — lifecycle', () => {
     expect(deleteBody.responseCode).toBe(200);
     expect(deleteBody.message).toBe(ApiMessages.ACCOUNT_DELETED);
 
+    // Verify the account no longer exists
     Logger.debug(`Verifying account ${user.email} no longer exists`);
     const verifyRes = await userApi.verifyLogin(user.email, user.password);
     const verifyBody = await verifyRes.json();
