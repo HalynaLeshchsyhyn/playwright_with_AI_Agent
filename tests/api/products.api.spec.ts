@@ -1,6 +1,8 @@
 import { test, expect } from '../fixtures/api.fixture';
 import { Logger } from '../../helpers/logger';
 import { ApiMessages } from './support/ApiMessages';
+import { parseApiResponse } from './support/apiResponseHelper';
+import { ApiResponseCode, HttpStatus } from './support/ResponseCodes';
 
 test.describe('Products & Brands API', () => {
 
@@ -10,13 +12,11 @@ test.describe('Products & Brands API', () => {
     Logger.info('Sending GET /api/productsList');
     const response = await productsApi.getProducts();
 
-    Logger.debug(`HTTP status: ${response.status()}`);
-    expect(response.status()).toBe(200);
+    expect(response.status()).toBe(HttpStatus.OK);
+    const body = await parseApiResponse(response);
+    Logger.debug(`Products count: ${body.products?.length}`);
 
-    const body = await response.json();
-    Logger.debug(`Response code: ${body.responseCode}, products count: ${body.products?.length}`);
-
-    expect(body.responseCode).toBe(200);
+    expect(body.responseCode).toBe(ApiResponseCode.OK);
     expect(Array.isArray(body.products)).toBeTruthy();
     expect(body.products.length).toBeGreaterThan(0);
 
@@ -32,13 +32,10 @@ test.describe('Products & Brands API', () => {
     Logger.info('Sending POST /api/productsList');
     const response = await productsApi.postToProducts();
 
-    Logger.debug(`HTTP status: ${response.status()}`);
-    expect(response.status()).toBe(200); // API always returns HTTP 200
+    expect(response.status()).toBe(HttpStatus.OK);
+    const body = await parseApiResponse(response);
 
-    const body = await response.json();
-    Logger.debug(`Response code: ${body.responseCode}, message: ${body.message}`);
-
-    expect(body.responseCode).toBe(405);
+    expect(body.responseCode).toBe(ApiResponseCode.METHOD_NOT_ALLOWED);
     expect(body.message).toBe(ApiMessages.METHOD_NOT_SUPPORTED);
   });
 
@@ -48,13 +45,11 @@ test.describe('Products & Brands API', () => {
     Logger.info('Sending GET /api/brandsList');
     const response = await productsApi.getBrands();
 
-    Logger.debug(`HTTP status: ${response.status()}`);
-    expect(response.status()).toBe(200);
+    expect(response.status()).toBe(HttpStatus.OK);
+    const body = await parseApiResponse(response);
+    Logger.debug(`Brands count: ${body.brands?.length}`);
 
-    const body = await response.json();
-    Logger.debug(`Response code: ${body.responseCode}, brands count: ${body.brands?.length}`);
-
-    expect(body.responseCode).toBe(200);
+    expect(body.responseCode).toBe(ApiResponseCode.OK);
     expect(Array.isArray(body.brands)).toBeTruthy();
     expect(body.brands.length).toBeGreaterThan(0);
 
@@ -67,13 +62,10 @@ test.describe('Products & Brands API', () => {
     Logger.info('Sending PUT /api/brandsList');
     const response = await productsApi.putToBrands();
 
-    Logger.debug(`HTTP status: ${response.status()}`);
-    expect(response.status()).toBe(200); // API always returns HTTP 200
+    expect(response.status()).toBe(HttpStatus.OK);
+    const body = await parseApiResponse(response);
 
-    const body = await response.json();
-    Logger.debug(`Response code: ${body.responseCode}, message: ${body.message}`);
-
-    expect(body.responseCode).toBe(405);
+    expect(body.responseCode).toBe(ApiResponseCode.METHOD_NOT_ALLOWED);
     expect(body.message).toBe(ApiMessages.METHOD_NOT_SUPPORTED);
   });
 
@@ -85,13 +77,11 @@ test.describe('Products & Brands API', () => {
 
     const response = await productsApi.searchProduct(searchTerm);
 
-    Logger.debug(`HTTP status: ${response.status()}`);
-    expect(response.status()).toBe(200);
+    expect(response.status()).toBe(HttpStatus.OK);
+    const body = await parseApiResponse(response);
+    Logger.debug(`Products found: ${body.products?.length}`);
 
-    const body = await response.json();
-    Logger.debug(`Response code: ${body.responseCode}, products found: ${body.products?.length}`);
-
-    expect(body.responseCode).toBe(200);
+    expect(body.responseCode).toBe(ApiResponseCode.OK);
     expect(Array.isArray(body.products)).toBeTruthy();
     expect(body.products.length).toBeGreaterThan(0);
 
@@ -106,13 +96,10 @@ test.describe('Products & Brands API', () => {
 
     const response = await productsApi.searchProductWithoutParam();
 
-    Logger.debug(`HTTP status: ${response.status()}`);
-    expect(response.status()).toBe(200); // API always returns HTTP 200
+    expect(response.status()).toBe(HttpStatus.OK);
+    const body = await parseApiResponse(response);
 
-    const body = await response.json();
-    Logger.debug(`Response code: ${body.responseCode}, message: ${body.message}`);
-
-    expect(body.responseCode).toBe(400);
+    expect(body.responseCode).toBe(ApiResponseCode.BAD_REQUEST);
     expect(body.message).toBe(ApiMessages.MISSING_SEARCH_PRODUCT);
   });
 
