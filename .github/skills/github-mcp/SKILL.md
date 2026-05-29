@@ -38,22 +38,37 @@ Before any GitHub operation:
 
 ## Step 0 — Ensure the GitHub MCP Server Is Running
 
-Before calling any `mcp_github_*` tool, verify the server is active. If a tool call returns
-`"Tool ... is currently disabled by the user"` or `"Tool not found"`, the server is not running.
+Before calling any `mcp_github_*` tool, the agent **must** verify and, if needed, start the server automatically.
 
-### How to detect
+### Agent procedure — auto-start the server
 
-Attempt any lightweight call (e.g. `tool_search` with `"github list repositories"`).
-If it fails with a disabled/not-found error, the server must be started first.
+**Step 0a — Try calling a lightweight MCP tool** (e.g. `mcp_github_get_me`).
 
-### How to start the server (VS Code UI)
+- If it **succeeds** → server is running, proceed to the workflow.
+- If it returns `"disabled by the user"` or `"Tool not found"` → execute Step 0b.
 
-1. Open the Command Palette: `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (macOS)
-2. Type **"MCP: List Servers"** and press Enter
-3. Find **`github`** in the list
-4. Click **Start** (if stopped) or **Restart** (if in error state)
-5. Wait for the status indicator to turn green / show "Running"
-6. Return to the chat and retry the operation
+**Step 0b — Start the server programmatically via VS Code command**
+
+```
+run_vscode_command(
+  commandId: "github.copilot.mcp.startServer",
+  args: ["github"],
+  name: "Start GitHub MCP Server"
+)
+```
+
+Wait 2–3 seconds, then retry the lightweight call from Step 0a.
+
+- If it **now succeeds** → server is running, proceed.
+- If `run_vscode_command` is itself disabled or fails → execute Step 0c (manual fallback).
+
+**Step 0c — Manual fallback (inform the user)**
+
+Tell the user:
+> "The GitHub MCP server could not be started automatically. Please start it manually:
+> 1. Press `Ctrl+Shift+P` → type **MCP: List Servers** → press Enter
+> 2. Find **`github`** in the list → click **Start**
+> 3. Wait for the status to show "Running", then ask me to retry."
 
 ### How to verify the server config exists
 
@@ -70,16 +85,16 @@ Check that `.vscode/mcp.json` contains the GitHub server entry:
 }
 ```
 
-If the entry is missing, add it and save the file, then follow the UI steps above.
+If the entry is missing, create the file with the config above, then run Step 0b again.
 
 ### Troubleshooting
 
 | Symptom | Fix |
 |---|---|
-| `"disabled by the user"` error | Enable via MCP panel → github → Start |
-| `"Tool not found"` after tool_search | Server not running — start it via MCP panel |
+| `"disabled by the user"` error | Run Step 0b — auto-start via `run_vscode_command` |
+| Auto-start fails | Run Step 0c — manual start via MCP panel |
 | Server starts but tools still fail | Sign out and sign back into GitHub in VS Code (`Ctrl+Shift+P` → "GitHub: Sign Out") |
-| `mcp.json` missing | Create `.vscode/mcp.json` with the config block above |
+| `mcp.json` missing | Create `.vscode/mcp.json` with the config block above, then retry |
 
 > **Note:** The GitHub MCP server uses your active VS Code GitHub session for authentication.
 > You must be signed into GitHub in VS Code for it to work.
