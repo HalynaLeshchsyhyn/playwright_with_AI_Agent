@@ -4,6 +4,8 @@ import { Logger } from '../../helpers/logger';
 import { ApiMessages } from './support/ApiMessages';
 import { buildAccountForm } from './support/accountFormBuilder';
 import { AccountFormData } from './support/types';
+import { parseApiResponse } from './support/apiResponseHelper';
+import { ApiResponseCode, HttpStatus } from './support/ResponseCodes';
 
 // ─── Stateless Login / Method Tests ──────────────────────────────────────────
 
@@ -14,13 +16,10 @@ test.describe('Login API — stateless tests', () => {
 
     const response = await userApi.verifyLoginWithoutEmail('anypassword');
 
-    Logger.debug(`HTTP status: ${response.status()}`);
-    expect(response.status()).toBe(200); // API always returns HTTP 200
+    expect(response.status()).toBe(HttpStatus.OK);
+    const body = await parseApiResponse(response);
 
-    const body = await response.json();
-    Logger.debug(`Response code: ${body.responseCode}, message: ${body.message}`);
-
-    expect(body.responseCode).toBe(400);
+    expect(body.responseCode).toBe(ApiResponseCode.BAD_REQUEST);
     expect(body.message).toBe(ApiMessages.MISSING_LOGIN_PARAMS);
   });
 
@@ -29,13 +28,10 @@ test.describe('Login API — stateless tests', () => {
 
     const response = await userApi.deleteVerifyLogin();
 
-    Logger.debug(`HTTP status: ${response.status()}`);
-    expect(response.status()).toBe(200); // API always returns HTTP 200
+    expect(response.status()).toBe(HttpStatus.OK);
+    const body = await parseApiResponse(response);
 
-    const body = await response.json();
-    Logger.debug(`Response code: ${body.responseCode}, message: ${body.message}`);
-
-    expect(body.responseCode).toBe(405);
+    expect(body.responseCode).toBe(ApiResponseCode.METHOD_NOT_ALLOWED);
     expect(body.message).toBe(ApiMessages.METHOD_NOT_SUPPORTED);
   });
 
@@ -45,13 +41,10 @@ test.describe('Login API — stateless tests', () => {
 
     const response = await userApi.verifyLogin(user.email, user.password);
 
-    Logger.debug(`HTTP status: ${response.status()}`);
-    expect(response.status()).toBe(200); // API always returns HTTP 200
+    expect(response.status()).toBe(HttpStatus.OK);
+    const body = await parseApiResponse(response);
 
-    const body = await response.json();
-    Logger.debug(`Response code: ${body.responseCode}, message: ${body.message}`);
-
-    expect(body.responseCode).toBe(404);
+    expect(body.responseCode).toBe(ApiResponseCode.NOT_FOUND);
     expect(body.message).toBe(ApiMessages.USER_NOT_FOUND);
   });
 
@@ -76,17 +69,14 @@ test.describe('User Account API — lifecycle', () => {
 
     Logger.info(`Creating test user account: ${accountEmail}`);
     const response = await userApi.createAccount(accountForm);
-    const body = await response.json();
-
-    Logger.debug(`Create account response: ${body.responseCode} — ${body.message}`);
-    expect(body.responseCode).toBe(201);
+    const body = await parseApiResponse(response);
+    expect(body.responseCode).toBe(ApiResponseCode.CREATED);
   });
 
   test.afterAll(async ({ userApi }) => {
     Logger.info(`Cleaning up test user account: ${accountEmail}`);
     const response = await userApi.deleteAccount(accountEmail, accountPassword);
-    const body = await response.json();
-    Logger.debug(`Cleanup delete response: ${body.responseCode} — ${body.message}`);
+    await parseApiResponse(response);
   });
 
   test('TC-API-011 — POST /api/createAccount creates a new user and returns responseCode 201', async ({ userApi }) => {
@@ -97,13 +87,10 @@ test.describe('User Account API — lifecycle', () => {
     Logger.info(`Creating new account via API: ${user.email}`);
     const response = await userApi.createAccount(form);
 
-    Logger.debug(`HTTP status: ${response.status()}`);
-    expect(response.status()).toBe(200); // API always returns HTTP 200
+    expect(response.status()).toBe(HttpStatus.OK);
+    const body = await parseApiResponse(response);
 
-    const body = await response.json();
-    Logger.debug(`Response code: ${body.responseCode}, message: ${body.message}`);
-
-    expect(body.responseCode).toBe(201);
+    expect(body.responseCode).toBe(ApiResponseCode.CREATED);
     expect(body.message).toBe(ApiMessages.USER_CREATED);
 
     Logger.debug(`Deleting extra account: ${user.email}`);
@@ -115,13 +102,10 @@ test.describe('User Account API — lifecycle', () => {
 
     const response = await userApi.verifyLogin(accountEmail, accountPassword);
 
-    Logger.debug(`HTTP status: ${response.status()}`);
-    expect(response.status()).toBe(200);
+    expect(response.status()).toBe(HttpStatus.OK);
+    const body = await parseApiResponse(response);
 
-    const body = await response.json();
-    Logger.debug(`Response code: ${body.responseCode}, message: ${body.message}`);
-
-    expect(body.responseCode).toBe(200);
+    expect(body.responseCode).toBe(ApiResponseCode.OK);
     expect(body.message).toBe(ApiMessages.USER_EXISTS);
   });
 
@@ -143,13 +127,10 @@ test.describe('User Account API — lifecycle', () => {
     Logger.info(`Sending PUT /api/updateAccount for ${accountEmail}`);
     const response = await userApi.updateAccount(updatedForm);
 
-    Logger.debug(`HTTP status: ${response.status()}`);
-    expect(response.status()).toBe(200); // API always returns HTTP 200
+    expect(response.status()).toBe(HttpStatus.OK);
+    const body = await parseApiResponse(response);
 
-    const body = await response.json();
-    Logger.debug(`Response code: ${body.responseCode}, message: ${body.message}`);
-
-    expect(body.responseCode).toBe(200);
+    expect(body.responseCode).toBe(ApiResponseCode.OK);
     expect(body.message).toBe(ApiMessages.USER_UPDATED);
   });
 
@@ -158,13 +139,10 @@ test.describe('User Account API — lifecycle', () => {
 
     const response = await userApi.getUserByEmail(accountEmail);
 
-    Logger.debug(`HTTP status: ${response.status()}`);
-    expect(response.status()).toBe(200);
+    expect(response.status()).toBe(HttpStatus.OK);
+    const body = await parseApiResponse(response);
 
-    const body = await response.json();
-    Logger.debug(`Response code: ${body.responseCode}, user name: ${body.user?.name}`);
-
-    expect(body.responseCode).toBe(200);
+    expect(body.responseCode).toBe(ApiResponseCode.OK);
     expect(body.user).toBeDefined();
     expect(body.user.email).toBe(accountEmail);
     expect(body.user.name).toBe(accountName);
@@ -185,25 +163,22 @@ test.describe('User Account API — lifecycle', () => {
 
     Logger.info(`Creating account to delete: ${user.email}`);
     const createRes = await userApi.createAccount(form);
-    const createBody = await createRes.json();
-    expect(createBody.responseCode).toBe(201);
+    const createBody = await parseApiResponse(createRes);
+    expect(createBody.responseCode).toBe(ApiResponseCode.CREATED);
 
     Logger.info(`Sending DELETE /api/deleteAccount for ${user.email}`);
     const deleteRes = await userApi.deleteAccount(user.email, user.password);
 
-    Logger.debug(`HTTP status: ${deleteRes.status()}`);
-    expect(deleteRes.status()).toBe(200); // API always returns HTTP 200
+    expect(deleteRes.status()).toBe(HttpStatus.OK);
+    const deleteBody = await parseApiResponse(deleteRes);
 
-    const deleteBody = await deleteRes.json();
-    Logger.debug(`Response code: ${deleteBody.responseCode}, message: ${deleteBody.message}`);
-
-    expect(deleteBody.responseCode).toBe(200);
+    expect(deleteBody.responseCode).toBe(ApiResponseCode.OK);
     expect(deleteBody.message).toBe(ApiMessages.ACCOUNT_DELETED);
 
     Logger.debug(`Verifying account ${user.email} no longer exists`);
     const verifyRes = await userApi.verifyLogin(user.email, user.password);
-    const verifyBody = await verifyRes.json();
-    expect(verifyBody.responseCode).toBe(404);
+    const verifyBody = await parseApiResponse(verifyRes);
+    expect(verifyBody.responseCode).toBe(ApiResponseCode.NOT_FOUND);
   });
 
 });
