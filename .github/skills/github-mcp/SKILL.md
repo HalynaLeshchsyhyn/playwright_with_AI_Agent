@@ -1,6 +1,6 @@
 ---
 name: github-mcp
-description: 'Perform GitHub operations using the GitHub MCP server. Use when: "create branch", "push files to GitHub", "commit to GitHub", "create pull request", "create PR", "merge PR", "list branches", "create issue", "search repositories", "get file from GitHub", "update PR", "request review", "list repos".'
+description: 'Perform GitHub operations using the GitHub MCP server. Use when: "create branch", "push files to GitHub", "commit to GitHub", "create pull request", "create PR", "merge PR", "list branches", "create issue", "search repositories", "get file from GitHub", "update PR", "request review", "list repos", "create local branch", "git add", "git commit", "push to remote", "stage changes", "commit local changes".'
 argument-hint: 'Describe the GitHub operation to perform: owner/repo, branch name, files to push, PR title/base/head, etc.'
 ---
 
@@ -15,6 +15,9 @@ argument-hint: 'Describe the GitHub operation to perform: owner/repo, branch nam
 - Search repositories, pull requests, or users
 - Read file contents from a GitHub repository
 - Request a Copilot code review on a PR
+- Create a new local git branch and switch to it
+- Stage (add) and commit local changes with git
+- Push a local branch to a remote repository
 
 ---
 
@@ -266,9 +269,83 @@ Types: `feat`, `fix`, `refactor`, `test`, `chore`, `docs`
 
 ---
 
+### Workflow G — Local Git: Create Branch, Commit & Push
+
+Use this workflow when the user wants to work with the **local git repository** (not the GitHub API).
+All commands run in the terminal via `run_in_terminal`.
+
+#### Step 1 — Create and switch to a new local branch
+
+```bash
+git checkout -b <new-branch-name>
+# or, with modern git:
+git switch -c <new-branch-name>
+```
+
+> If branching off a specific base, fetch first:
+> ```bash
+> git fetch origin
+> git checkout -b <new-branch-name> origin/<base-branch>
+> ```
+
+#### Step 2 — Stage changes
+
+```bash
+# Stage specific files
+git add path/to/file.ts path/to/another.ts
+
+# Stage all changed/new files tracked by the repo
+git add .
+```
+
+Verify what will be committed before staging:
+```bash
+git status
+git diff --stat
+```
+
+#### Step 3 — Commit changes
+
+```bash
+git commit -m "<type>: <short summary>"
+```
+
+Follow the commit message convention:
+```
+<type>: <short summary>
+
+<optional body — list of changes>
+```
+Types: `feat`, `fix`, `refactor`, `test`, `chore`, `docs`
+
+#### Step 4 — Push to remote
+
+```bash
+# First push — set upstream tracking
+git push -u origin <new-branch-name>
+
+# Subsequent pushes on the same branch
+git push
+```
+
+> After pushing, the terminal output will print a URL to open a pull request. Share it with the user if relevant.
+
+#### Full example
+
+```bash
+git checkout -b feat/add-login-tests
+git add tests/ui/login.spec.ts pages/LoginPage.ts
+git commit -m "test: add login E2E tests"
+git push -u origin feat/add-login-tests
+```
+
+---
+
 ## Safety Rules
 
 - **Never force-push** or reset branches via the API — use `push_files` which creates safe commits.
+- **Never run `git push --force`** on shared/main branches — always confirm with the user first.
 - **Confirm before merging** — always state the PR number and base branch to the user before calling `merge_pull_request`.
 - **Do not push secrets** — check file contents for API keys, passwords, or tokens before pushing.
 - Deleting branches or closing PRs requires explicit user confirmation.
+- **Review `git status` output** before staging to avoid committing unintended files.
